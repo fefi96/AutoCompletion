@@ -12,7 +12,7 @@ public class Main {
         autocompletion.insertWord("Appendix");
         autocompletion.insertWord("Auto");
         autocompletion.insertWord("Baum");
-        final List<String> words = autocompletion.predictWords("Apples");
+        final List<String> words = autocompletion.predictWords("app");
         System.out.println(words);
     }
 

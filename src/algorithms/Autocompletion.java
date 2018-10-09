@@ -20,6 +20,7 @@ public final class Autocompletion {
         return rootNode.findCompletions(prefix.trim().toLowerCase())
                 .stream()
                 .map(string -> String.format("%s%s", prefix.trim().toLowerCase(), string))
+                .map(string -> string.substring(0, 1).toUpperCase() + string.substring(1))
                 .collect(Collectors.toList());
     }
 
@@ -29,23 +30,21 @@ public final class Autocompletion {
     private static final class TrieNode {
         private final char value;
         private final TrieNode parentNode;
-        private final List<TrieNode> childNodes;
+        private final Set<TrieNode> childNodes;
 
         private TrieNode(char value, TrieNode parentNode) {
             this.value = value;
             this.parentNode = parentNode;
-            this.childNodes = new LinkedList<>();
+            this.childNodes = new HashSet<>();
+            if (this.parentNode != null)
+                this.parentNode.getChildNodes().add(this);
         }
 
         private char getValue() {
             return value;
         }
 
-        private TrieNode getParentNode() {
-            return parentNode;
-        }
-
-        private List<TrieNode> getChildNodes() {
+        private Set<TrieNode> getChildNodes() {
             return childNodes;
         }
 
@@ -60,7 +59,6 @@ public final class Autocompletion {
                         .findFirst()
                         .orElse(new TrieNode(word.charAt(0), this));
                 node.insertWord(word.substring(1));
-                childNodes.add(node);
             }
         }
 
@@ -70,6 +68,21 @@ public final class Autocompletion {
                     "value=" + value +
                     ", childNodes=" + childNodes +
                     '}';
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o)
+                return true;
+            if (!(o instanceof TrieNode))
+                return false;
+            TrieNode node = (TrieNode) o;
+            return getValue() == node.getValue();
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(getValue());
         }
 
         private Set<String> findCompletions(final String prefix) {
